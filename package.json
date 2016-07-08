@@ -1,0 +1,30 @@
+{
+  "name": "x51",
+  "version": "1.0.0",
+  "description": "Utility for aggregating and flushing items to be processed",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha index.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MikeyBurkman/x51.git"
+  },
+  "keywords": [
+    "batch",
+    "flush",
+    "process"
+  ],
+  "author": "MikeyBurkman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MikeyBurkman/x51/issues"
+  },
+  "homepage": "https://github.com/MikeyBurkman/x51#readme",
+  "devDependencies": {
+    "bluebird": "~3.4.0",
+    "chai": "~3.5.0",
+    "mocha": "~2.5.3",
+    "sinon": "~1.17.4"
+  }
+}
