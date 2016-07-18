@@ -6,19 +6,18 @@ var Promise = require('bluebird');
 
 describe(__filename, function() {
 
-  var x51;
+  var mod;
 
   beforeEach(function() {
     delete require.cache[require.resolve('./index')];
-    var mod = require('./index');
-    x51 = mod();
+    mod = require('./index');
   });
 
 
   it('Should flush according to the flush interval', function(done) {
     var flush = sinon.stub();
 
-    x51.init({
+    var x51 = mod({
       flush: flush,
       flushInterval: 200
     });
@@ -36,35 +35,13 @@ describe(__filename, function() {
 
   });
 
-  it('Should not flush until it has been initialized', function() {
-
-    x51.push({});
-
-    x51.flush();
-
-    var flush = sinon.stub();
-
-    x51.init({
-      flush: flush
-    });
-
-    x51.push({});
-    
-    x51.flush();
-
-    expect(flush.callCount).to.eql(1);
-
-    var items = flush.getCall(0).args[0];
-    expect(items.length).to.eql(2);
-  });
-
   it('Should not lose records if flush throws an error', function() {
     var flush = sinon.stub();
 
     flush.onCall(0).throws(new Error());
     flush.onCall(1).returns(undefined);
 
-    x51.init({
+    var x51 = mod({
       flush: flush
     });
 
@@ -94,7 +71,7 @@ describe(__filename, function() {
     flush.onCall(0).returns(Promise.reject(new Error()));
     flush.onCall(1).returns(Promise.resolve());
 
-    x51.init({
+    var x51 = mod({
       flush: flush
     });
 
@@ -125,7 +102,7 @@ describe(__filename, function() {
   it('Should not flush automatically if the number of records is below the set threshold', function() {
     var flush = sinon.stub();
 
-    x51.init({
+    var x51 = mod({
       flush: flush,
       maxRecords: 2
     });
@@ -138,7 +115,7 @@ describe(__filename, function() {
   it('Should proactively flush if the number of records passes the set threshold', function() {
     var flush = sinon.stub();
 
-    x51.init({
+    var x51 = mod({
       flush: flush,
       maxRecords: 2
     });

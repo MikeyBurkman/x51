@@ -1,13 +1,15 @@
 'use strict';
 
-module.exports = function() {
+module.exports = function(opts) {
   
-  var _configured = false;
-  var _flushInterval;
-  var _maxRecords;
-  var _flush;
-  
-  var _log = _defaultLogger();
+  var _flush = opts.flush;
+  var _flushInterval = opts.flushInterval || 60000;
+  var _maxRecords = opts.maxRecords || Infinity;
+  var _log = opts.log || _defaultLogger();
+
+  if (!_flush) {
+    throw new Error('You must provide a `flush` funtion to init(opts)');
+  }
 
   // Will flush using this setTimeout
   var _timeout;
@@ -15,47 +17,30 @@ module.exports = function() {
   var _items = [];
   
   var self = {
-    init: init,
     push: push,
     flush: flush
   };
+  
+  setFlushInterval();
   
   return self;
   
   /////
   
-  function init(opts) {
-    _configured = false;
-
-    _flush = opts.flush;
-    _flushInterval = opts.flushInterval || 60000;
-    _maxRecords = opts.maxRecords || Infinity;
-    _log = opts.log || _defaultLogger();
-
-    if (!_flush) {
-      throw new Error('You must provide a `flush` funtion to init(opts)');
+  function setFlushInterval() {
+    clearTimeout(_timeout);
+    if (_flushInterval < Infinity) {
+      _timeout = setTimeout(flush, _flushInterval);
     }
-
-    _configured = true;
-
-    _timeout = setTimeout(flush, _flushInterval);
-
-    return self;
   }
   
-  function flush() {
+  function flush(resetFlush) {
     
-    // If we flushed because we reached our max items, then make sure we don't
-    //  try to automatically flush again until the flushInterval has passed
-    clearTimeout(_timeout);
-    _timeout = setTimeout(flush, _flushInterval);
-
-    if (_items.length === 0) {
-      return;
+    if (resetFlush) {
+      setFlushInterval();
     }
 
-    if (!_configured) {
-      _log.warn('X51 is trying to flush records, but it has not been initialized yet');
+    if (_items.length === 0) {
       return;
     }
 
@@ -73,7 +58,7 @@ module.exports = function() {
       _items = _items.concat(curBatch);
     }
 
-    if (res && res.catch) {
+    if (res && res.then && res.catch) {
       // Was probably a promise -- try catching and handling any errors
       res.catch(function(err) {
         _log.error(err, 'Error sending items');
@@ -81,22 +66,22 @@ module.exports = function() {
         _items = _items.concat(curBatch);
       });
     }
-
-    // TODO: What if flush() is a callback function?
   }
   
   function push(item) {
     _items.push(item);
 
     if (_items.length >= _maxRecords) {
-      flush();
+      // If we flushed because we reached our max items, then make sure we don't
+      //  try to automatically flush again until the flushInterval has passed
+      flush(true);
     }
   }
   
   function _defaultLogger() {
+    var noop = function() {};
     return {
-      warn: console.error.bind(console, '<WARN>'),
-      error: console.error.bind(console, '<ERROR>')
+      error: noop
     };
   }
 

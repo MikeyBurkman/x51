@@ -1,6 +1,6 @@
 {
   "name": "x51",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Utility for aggregating and flushing items to be processed",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,8 @@
   "keywords": [
     "batch",
     "flush",
-    "process"
+    "process",
+    "aggregate"
   ],
   "author": "MikeyBurkman",
   "license": "MIT",
