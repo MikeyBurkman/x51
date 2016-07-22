@@ -34,6 +34,35 @@ describe(__filename, function() {
     }, 250);
 
   });
+  
+  it('Should flush continuously', function(done) {
+    var flush = sinon.stub();
+
+    var x51 = mod({
+      flush: flush,
+      flushInterval: 50
+    });
+
+    x51.push({});
+    
+    setTimeout(function() {
+      expect(flush.callCount).to.eql(1);
+      var items = flush.getCall(0).args[0];
+      expect(items.length).to.eql(1);
+
+      x51.push({});
+      x51.push({});
+      
+      // Should flush a second time
+      setTimeout(function() {
+        expect(flush.callCount).to.eql(2);
+        var items = flush.getCall(1).args[0];
+        expect(items.length).to.eql(2);
+        
+        done();
+      }, 60);
+    }, 70);
+  });
 
   it('Should not lose records if flush throws an error', function() {
     var flush = sinon.stub();

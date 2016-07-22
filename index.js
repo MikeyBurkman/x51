@@ -28,9 +28,9 @@ module.exports = function(opts) {
   /////
   
   function setFlushInterval() {
-    clearTimeout(_timeout);
+    clearInterval(_timeout);
     if (_flushInterval < Infinity) {
-      _timeout = setTimeout(flush, _flushInterval);
+      _timeout = setInterval(flush, _flushInterval);
     }
   }
   
